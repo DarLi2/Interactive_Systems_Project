@@ -1,0 +1,170 @@
+<html>
+  <head>
+      <title>CommunicationSystem</title>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Trirong">
+          <style>
+              h1 {
+                  color: rgb(0, 0, 0);
+                  text-shadow: 2px 2px 5px rgb(214, 160, 163);
+                  text-align: center;
+                  font-family: "Trirong", Verdana, sans-serif;
+                  opacity: 0.9;
+                  background-image: url("lights.jpg");
+                  margin: 70px;
+                  width: auto;
+              }
+              body {
+                  background-color: rgba(252, 252, 252, 0.651);
+                  font-family: Garamond, Verdana, sans-serif;
+              }
+              img {
+                  max-width: 100%;
+                  height: auto;
+                  width: 100px;
+                  border-radius: 8px;
+              }
+              div {
+                  padding: 70px;
+                  border: 1px solid #050505;
+              }
+              button {
+                  color: lightslategray;
+                  width: 150px;
+                  height: 150px;
+                  text-align: center;
+                  font-family: "Trirong", Verdana, sans-serif;
+              }
+              table {
+                  margin: 0 auto;
+                  text-align: center;
+              }
+              p {
+                  margin: 70px;
+                  text-align: center;
+                  color: rgba(185, 26, 26, 0.548);
+              } 
+              .meeting-button {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999; /* Make sure the button is on top of all other elements */
+                }
+          </style>
+  </head>
+  <body onload="javascript:websockstart();">
+      <h1>Team Status</h1>
+      
+      <button id="meetingButton" class="meeting-button" data-state="off">Meeting</button>
+      
+      <table style='font-family:"Trirong", Verdana, sans-serif'>
+          <tr>
+            <th>John</th>
+            <th>Mary</th> 
+          </tr>
+          <tr>
+              <td><button data-row="1" data-col="1" onclick="workingOnTask(1)"> Working on a task </button></td>
+              <td><button data-row="1" data-col="2" onclick="workingOnTask(2)"> Working on a task </button></td>
+          </tr>
+          <tr>
+              <td><button data-row="2" data-col="1" onclick="finishedTask(1)"> Finished task </button></td>
+              <td><button data-row="2" data-col="2" onclick="finishedTask(2)"> Finished task </button></td>
+          </tr>
+          <tr>
+              <td><button data-row="3" data-col="1" onclick="question(1)"> Question </button></td>
+              <td><button data-row="3" data-col="2" onclick="question(2)"> Question </button></td>
+          </tr>
+          <tr>
+              <td><button data-row="4" data-col="1" onclick="urgentQuestion(1)"> Urgent Question </button></td>
+              <td><button data-row="4" data-col="2" onclick="urgentQuestion(2)"> Urgent Question </button></td>
+          </tr>
+        </table>
+  </body>
+  <script>
+    var websock
+    function websockstart() {
+      websock = new WebSocket('ws://' + window.location.hostname + ':81/');
+      websock.onopen = function(evt) { console.log('websock open'); };
+      websock.onclose = function(evt) { console.log('websock close'); };
+      websock.onerror = function(evt) { console.log(evt); };
+    }
+    function sendSocket() {
+      Socket.send("hello")
+    }
+
+    function workingOnTask(index_employee){
+      console.log('Working_on_task_Button clicked by employee', index_employee);
+      let update_working_on_task = "workingOnTaskEmployee" + index_employee;
+      websock.send(update_working_on_task);
+    }
+
+    function finishedTask(index_employee){
+      console.log('Finished_task_Button clicked by employee', index_employee);
+      let update_finished_task = "finishedTaskEmployee" + index_employee;
+      websock.send(update_finished_task);
+    }
+
+    function question(index_employee){
+      console.log('Question_Button clicked by employee', index_employee);
+      let update_question = "questionEmployee" + index_employee;
+      websock.send(update_question);
+    }
+
+    function urgentQuestion(index_employee){
+    console.log('Urgent_Question_Button clicked by employee', index_employee);
+      let update_urgent_question = "urgentQuestionEmployee" + index_employee;
+      websock.send(update_urgent_question);
+    }
+   
+  meetingButton.addEventListener('click', function() {
+    if (meetingButton.dataset.state == "off") {
+      websock.send("meeting");
+      document.querySelectorAll('button:not(#myButton)').forEach(function(button) {
+        resetColor(button);
+      });
+      meetingButton.style.color = 'white';
+      meetingButton.dataset.state = "on";
+      meetingButton.style.backgroundColor = 'MidnightBlue';
+      console.log("midnight");
+    }
+    else {
+      websock.send("meetingOver");
+      meetingButton.dataset.state = "off";
+      meetingButton.style.color = 'lightgrey';
+      meetingButton.style.backgroundColor = 'white';
+      console.log("white");
+    }
+  });
+    
+    function resetColor(button) {
+        button.style.backgroundColor = 'white';
+        button.style.color = button.dataset.originalColor;
+    }
+
+    const buttons_first_row = document.querySelectorAll('tr:first-of-type button');
+
+    function changeColor(button) {
+        button.dataset.originalColor = button.style.color;
+        button.style.backgroundColor = 'CornflowerBlue';
+        button.style.color = 'white';
+    }
+
+    document.querySelectorAll('button:not(.meeting-button)').forEach(function(button) {
+        button.dataset.originalColor = button.style.color;
+        button.addEventListener('click', function() {
+          var col = button.dataset.col;
+          console.log('Button clicked in column', col);
+          resetColor(button);
+          changeColor(button);
+          resetColor(meetingButton);
+          meetingButton.dataset.state = "off";
+          meetingButton.style.color = button.dataset.originalColor;
+          meetingButton.style.color = button.dataset.originalColor;
+          document.querySelectorAll(`table td:nth-child(${col}) button`).forEach(function(otherButton) {
+          if (otherButton !== button) {
+          resetColor(otherButton);
+          }
+        });
+      });
+  })
+  </script>
+</html>
