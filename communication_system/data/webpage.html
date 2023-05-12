@@ -1,7 +1,7 @@
 <html>
   <head>
+    
       <title>CommunicationSystem</title>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Trirong">
           <style>
               h1 {
                   color: rgb(0, 0, 0);
@@ -9,7 +9,6 @@
                   text-align: center;
                   font-family: "Trirong", Verdana, sans-serif;
                   opacity: 0.9;
-                  background-image: url("lights.jpg");
                   margin: 70px;
                   width: auto;
               }
@@ -51,7 +50,7 @@
                 }
           </style>
   </head>
-  <body onload="javascript:websockstart();">
+  <body>
       <h1>Team Status</h1>
       
       <button id="meetingButton" class="meeting-button" data-state="off">Meeting</button>
@@ -62,109 +61,128 @@
             <th>Mary</th> 
           </tr>
           <tr>
-              <td><button data-row="1" data-col="1" onclick="workingOnTask(1)"> Working on a task </button></td>
-              <td><button data-row="1" data-col="2" onclick="workingOnTask(2)"> Working on a task </button></td>
+              <td><button id='workingOnTaskEmployee1' data-row="1" data-col="1" onclick="websock.send('workingOnTaskEmployee1')"> Working on a task </button></td>
+              <td><button id='workingOnTaskEmployee2' data-row="1" data-col="2" onclick="websock.send('workingOnTaskEmployee2')"> Working on a task </button></td>
           </tr>
           <tr>
-              <td><button data-row="2" data-col="1" onclick="finishedTask(1)"> Finished task </button></td>
-              <td><button data-row="2" data-col="2" onclick="finishedTask(2)"> Finished task </button></td>
+              <td><button id='finishedTaskEmployee1' data-row="2" data-col="1" onclick="websock.send('finishedTaskEmployee1')"> Finished task </button></td>
+              <td><button id='finishedTaskEmployee2' data-row="2" data-col="2" onclick="websock.send('finishedTaskEmployee2')"> Finished task </button></td>
           </tr>
           <tr>
-              <td><button data-row="3" data-col="1" onclick="question(1)"> Question </button></td>
-              <td><button data-row="3" data-col="2" onclick="question(2)"> Question </button></td>
+              <td><button id='questionEmployee1' data-row="3" data-col="1" onclick="websock.send('questionEmployee1')"> Question </button></td>
+              <td><button id='questionEmployee2' data-row="3" data-col="2" onclick="websock.send('questionEmployee2')"> Question </button></td>
           </tr>
           <tr>
-              <td><button data-row="4" data-col="1" onclick="urgentQuestion(1)"> Urgent Question </button></td>
-              <td><button data-row="4" data-col="2" onclick="urgentQuestion(2)"> Urgent Question </button></td>
+              <td><button id='urgentQuestionEmployee1' data-row="4" data-col="1" onclick="websock.send('urgentQuestionEmployee1')"> Urgent Question </button></td>
+              <td><button id='urgentQuestionEmployee2' data-row="4" data-col="2" onclick="websock.send('urgentQuestionEmployee2')"> Urgent Question </button></td>
           </tr>
         </table>
   </body>
   <script>
-    var websock
-    function websockstart() {
-      websock = new WebSocket('ws://' + window.location.hostname + ':81/');
-      websock.onopen = function(evt) { console.log('websock open'); };
-      websock.onclose = function(evt) { console.log('websock close'); };
-      websock.onerror = function(evt) { console.log(evt); };
-    }
-    function sendSocket() {
-      Socket.send("hello")
-    }
-
-    function workingOnTask(index_employee){
-      console.log('Working_on_task_Button clicked by employee', index_employee);
-      let update_working_on_task = "workingOnTaskEmployee" + index_employee;
-      websock.send(update_working_on_task);
-    }
-
-    function finishedTask(index_employee){
-      console.log('Finished_task_Button clicked by employee', index_employee);
-      let update_finished_task = "finishedTaskEmployee" + index_employee;
-      websock.send(update_finished_task);
-    }
-
-    function question(index_employee){
-      console.log('Question_Button clicked by employee', index_employee);
-      let update_question = "questionEmployee" + index_employee;
-      websock.send(update_question);
-    }
-
-    function urgentQuestion(index_employee){
-    console.log('Urgent_Question_Button clicked by employee', index_employee);
-      let update_urgent_question = "urgentQuestionEmployee" + index_employee;
-      websock.send(update_urgent_question);
-    }
+    websock = new WebSocket('ws://' + window.location.hostname + ':81/');
+    websock.onopen = function(evt) { console.log('websock open'); };
+    websock.onclose = function(evt) { console.log('websock close'); };
+    websock.onerror = function(evt) { console.log(evt); };
    
-  meetingButton.addEventListener('click', function() {
-    if (meetingButton.dataset.state == "off") {
-      websock.send("meeting");
-      document.querySelectorAll('button:not(#myButton)').forEach(function(button) {
-        resetColor(button);
-      });
-      meetingButton.style.color = 'white';
-      meetingButton.dataset.state = "on";
-      meetingButton.style.backgroundColor = 'MidnightBlue';
-      console.log("midnight");
-    }
-    else {
-      websock.send("meetingOver");
-      meetingButton.dataset.state = "off";
-      meetingButton.style.color = 'lightgrey';
-      meetingButton.style.backgroundColor = 'white';
-      console.log("white");
-    }
-  });
+    meetingButton.addEventListener('click', function() {
+      if (meetingButton.dataset.state == "off") {
+        websock.send("meeting");
+      }
+      else {
+        websock.send("meetingOver");
+      }
+    });
     
     function resetColor(button) {
         button.style.backgroundColor = 'white';
         button.style.color = button.dataset.originalColor;
     }
 
-    const buttons_first_row = document.querySelectorAll('tr:first-of-type button');
+    var backgroundColorsBeforeMeeting = {}; 
+    var colorsBeforeMeeting = {}; 
 
-    function changeColor(button) {
+    function changeColorForMeetings() {
+      document.querySelectorAll('button:not(#meetingButton)').forEach(function(button) {
+        backgroundColorsBeforeMeeting[button.id] = button.style.backgroundColor;
+        colorsBeforeMeeting[button.id] = button.style.color;
+        resetColor(button);
+      });
+      console.log("saved colors before meeting", backgroundColorsBeforeMeeting);
+    }
+
+    function changeColorAfterMeetings() {
+      document.querySelectorAll('button:not(#meetingButton)').forEach(function(button) {
+        button.style.backgroundColor = backgroundColorsBeforeMeeting[button.id];
+        button.style.color = colorsBeforeMeeting[button.id];
+      });
+    }
+
+    //const buttons_first_row = document.querySelectorAll('tr:first-of-type button');
+
+    function changeColorToActivated(button) {
         button.dataset.originalColor = button.style.color;
         button.style.backgroundColor = 'CornflowerBlue';
+        console.log("color of button", button.id, "is now" , button.style.backgroundColor);
         button.style.color = 'white';
     }
 
-    document.querySelectorAll('button:not(.meeting-button)').forEach(function(button) {
-        button.dataset.originalColor = button.style.color;
-        button.addEventListener('click', function() {
-          var col = button.dataset.col;
-          console.log('Button clicked in column', col);
-          resetColor(button);
-          changeColor(button);
-          resetColor(meetingButton);
-          meetingButton.dataset.state = "off";
-          meetingButton.style.color = button.dataset.originalColor;
-          meetingButton.style.color = button.dataset.originalColor;
-          document.querySelectorAll(`table td:nth-child(${col}) button`).forEach(function(otherButton) {
-          if (otherButton !== button) {
-          resetColor(otherButton);
-          }
-        });
+    function updateColorOfButtons(buttonClicked) {
+
+      //gets Button by its Id
+      var buttonId = buttonClicked.slice(0, -1);
+      console.log('in updatOtherButton function with argument', buttonId);
+      const button = document.getElementById(buttonId);
+
+      changeColorToActivated(button);
+
+      var col = button.dataset.col;
+
+      //resets the color of the meeting button
+      resetColor(meetingButton);
+      meetingButton.dataset.state = "off";
+      meetingButton.style.color = button.dataset.originalColor;
+
+      //resets color of all other buttons in that row
+      document.querySelectorAll(`table td:nth-child(${col}) button`).forEach(function(otherButton) {
+            if (otherButton !== button) {
+            resetColor(otherButton);
+            }
       });
-  })
+    }
+
+    function setMeetingState(state) {
+      if (state == "on") {
+        meetingButton.dataset.state = "on";
+        meetingButton.style.color = 'white';
+        meetingButton.style.backgroundColor = 'MidnightBlue';
+      }
+      if (state == "off") {
+        meetingButton.dataset.state = "off";
+        meetingButton.style.color = 'grey';
+        meetingButton.style.backgroundColor = 'white';
+      }
+    }
+    
+    websock.onmessage = function(event) {
+
+      console.log('Received message:', event.data);
+
+      const meetingButton = document.getElementById('meetingButton');
+
+      if (event.data !== "meeting" + "\u0000" && event.data !== "meetingOver" + "\u0000") {
+        updateColorOfButtons(event.data);
+        setMeetingState("off");
+      }
+
+      else if (event.data == "meeting" + "\u0000") {
+        setMeetingState("on");
+        changeColorForMeetings();
+      }
+
+      else {
+        setMeetingState("off");
+        changeColorAfterMeetings();
+      }
+    }
   </script>
 </html>

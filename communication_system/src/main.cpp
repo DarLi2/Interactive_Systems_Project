@@ -33,6 +33,9 @@ void handleRoot() {
   file.close();
 }
 
+
+
+
 void updateStatus(char status, int employee);
 void meeting();
 void meetingOver();
@@ -40,7 +43,6 @@ void meetingOver();
 void webSocketEvent(unsigned char num, WStype_t type, uint8_t* payload, unsigned int lenght) {
   if (type == WStype_CONNECTED) {
     Serial.println("WebSocketClient connected");
-    webSocket.sendTXT(num, "hallo", 6);
   }
   if (type == WStype_DISCONNECTED) {
     Serial.println("WebSocketClient disconnected");
@@ -80,11 +82,11 @@ void webSocketEvent(unsigned char num, WStype_t type, uint8_t* payload, unsigned
     }
     if ((strcmp("meeting", (const char*) payload)) == 0) {
       meeting();
-      webSocket.broadcastTXT("meeting", 24);
+      webSocket.broadcastTXT("meeting", 8);
     }
     if ((strcmp("meetingOver", (const char*) payload)) == 0) {
       meetingOver();
-      webSocket.broadcastTXT("meetingOver", 24);
+      webSocket.broadcastTXT("meetingOver", 12);
     }
   }
 }
@@ -165,6 +167,7 @@ void updateStatus(char status, int employee) {
 void loop() {
   server.handleClient();
   webSocket.loop();
+
 }
 
 
