@@ -6,6 +6,9 @@
 #include <ESP8266WebServer.h>
 #include <WebSocketsServer.h>
 
+#include "SoftwareSerial.h"
+#include "DFRobotDFPlayerMini.h"
+
 #ifndef APSSID
 #define APSSID "TeamNet"
 #define APPSK  "thereisnospoon"
@@ -14,6 +17,9 @@
 #include <FastLED.h>
 #define LED_PIN D8
 #define NUM_LEDS 60
+
+SoftwareSerial mySoftwareSerial(D4,D3); //first argument: number of pin for transmitting; second argument: numver of pin for receiving
+DFRobotDFPlayerMini DFPlayer;
 
 CRGB leds[NUM_LEDS];
 
@@ -32,9 +38,6 @@ void handleRoot() {
   server.streamFile(file, "text/html");
   file.close();
 }
-
-
-
 
 void updateStatus(char status, int employee);
 void meeting();
@@ -74,10 +77,12 @@ void webSocketEvent(unsigned char num, WStype_t type, uint8_t* payload, unsigned
     }
     if ((strcmp("urgentQuestionEmployee1", (const char*) payload)) == 0) {
       updateStatus('u', 1);
+      DFPlayer.play(1);
       webSocket.broadcastTXT("urgentQuestionEmployee1", 24);
     }
     if ((strcmp("urgentQuestionEmployee2", (const char*) payload)) == 0) {
       updateStatus('u', 2);
+      DFPlayer.play(2);
       webSocket.broadcastTXT("urgentQuestionEmployee2", 24);
     }
     if ((strcmp("meeting", (const char*) payload)) == 0) {
@@ -104,6 +109,15 @@ void setup() {
   FastLED.clear();
   pinMode(D8, OUTPUT);
 
+  mySoftwareSerial.begin(9600);
+  if (!DFPlayer.begin(mySoftwareSerial)) {  //Use softwareSerial to communicate with mp3.
+    Serial.println(F("Unable to begin:"));
+    Serial.println(F("1.Please recheck the connection!"));
+    Serial.println(F("2.Please insert the SD card!"));
+    while(true);
+  }
+  DFPlayer.volume(20);
+
   Serial.print("Configuring access point...");
   WiFi.mode(WIFI_AP);
   WiFi.softAP(ssid, password);
@@ -118,6 +132,7 @@ void setup() {
   Serial.println("HTTP server started");
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
+
 }
 
 void setLEDs(int start, int end, char status) {
