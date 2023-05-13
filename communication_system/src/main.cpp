@@ -152,7 +152,7 @@ void setLEDs(int start, int end, char status) {
 
 void meeting() {
   for (int i=0; i<NUM_LEDS; i++) {
-    leds[i] = CRGB(50, 150, 255);
+    leds[i] = CRGB::LightBlue;
   }
   FastLED.show();
   FastLED.show();
