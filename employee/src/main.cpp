@@ -64,12 +64,6 @@ void setup() {
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 500);
   FastLED.clear();
   pinMode(LED_PIN, OUTPUT);
-  
-  //for(uint8_t t = 4; t > 0; t--) {
-  //  Serial.printf("[SETUP] BOOT WAIT %d...\n", t);
-  //  Serial.flush();
-  //  delay(1000);
-  //}
 
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP("TeamNet", "thereisnospoon");
