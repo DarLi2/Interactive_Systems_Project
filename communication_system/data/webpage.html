@@ -80,7 +80,7 @@
   </body>
   <script>
     websock = new WebSocket('ws://' + window.location.hostname + ':81/');
-    websock.onopen = function(evt) { console.log('websock open'); };
+    websock.onopen = function(evt) { console.log('webocket open');};
     websock.onclose = function(evt) { console.log('websock close'); };
     websock.onerror = function(evt) { console.log(evt); };
    
@@ -95,25 +95,31 @@
     
     function resetColor(button) {
         button.style.backgroundColor = 'white';
-        button.style.color = button.dataset.originalColor;
+        button.style.color = "grey";
     }
 
-    var backgroundColorsBeforeMeeting = {}; 
-    var colorsBeforeMeeting = {}; 
+    var savedBackgroundColors = {}; 
+    var savedColors = {}; 
+
+    function saveColors() {
+      document.querySelectorAll('button:not(#meetingButton)').forEach(function(button) {
+        savedBackgroundColors[button.id] = button.style.backgroundColor;
+        savedColors[button.id] = button.style.color;
+      });
+    }
 
     function changeColorForMeetings() {
+      saveColors()
       document.querySelectorAll('button:not(#meetingButton)').forEach(function(button) {
-        backgroundColorsBeforeMeeting[button.id] = button.style.backgroundColor;
-        colorsBeforeMeeting[button.id] = button.style.color;
         resetColor(button);
       });
-      console.log("saved colors before meeting", backgroundColorsBeforeMeeting);
+      console.log("saved colors before meeting", savedBackgroundColors);
     }
 
-    function changeColorAfterMeetings() {
+    function restoreColors() {
       document.querySelectorAll('button:not(#meetingButton)').forEach(function(button) {
-        button.style.backgroundColor = backgroundColorsBeforeMeeting[button.id];
-        button.style.color = colorsBeforeMeeting[button.id];
+        button.style.backgroundColor = savedBackgroundColors[button.id];
+        button.style.color = savedColors[button.id];
       });
     }
 
@@ -167,9 +173,15 @@
 
       const meetingButton = document.getElementById('meetingButton');
 
-      if (event.data !== "meeting" + "\u0000" && event.data !== "meetingOver" + "\u0000") {
-        updateColorOfButtons(event.data);
+      if (event.data == "newDeviceConnected" + "\u0000") {
+        console.log("newDeviceConnectedReceived");
+        saveColors();
+        restoreColors();
+      }
+
+      if (event.data == "meetingOver" + "\u0000") {
         setMeetingState("off");
+        restoreColors();
       }
 
       else if (event.data == "meeting" + "\u0000") {
@@ -177,9 +189,8 @@
         changeColorForMeetings();
       }
 
-      else {
-        setMeetingState("off");
-        changeColorAfterMeetings();
+      else if (event.data.indexOf("statusUpdate") != -1 && meetingButton.dataset.state != "on") {
+        updateColorOfButtons(event.data.substring(13, event.data.length));
       }
     }
   </script>

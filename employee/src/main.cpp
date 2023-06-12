@@ -13,6 +13,7 @@ WebSocketsClient webSocket;
 CRGB leds[NUM_LEDS];
 
 void setLEDsWorkingMode() {
+  Serial.printf("in Working Mode function");
   for (int i = 0; i < NUM_LEDS; i++) {
   leds[i] = CRGB::DarkBlue;  
   }
@@ -21,9 +22,16 @@ void setLEDsWorkingMode() {
 }
 
 void setLEDsMeetingMode() {
+  Serial.printf("in Meeting Mode function");
   for (int i = 0; i < NUM_LEDS; i++) {
   leds[i] = CRGB::LightBlue;  
   }
+  FastLED.show();
+  FastLED.show();
+}
+
+void adjustBrightness(int brightness) {
+  FastLED.setBrightness(brightness);
   FastLED.show();
   FastLED.show();
 }
@@ -44,12 +52,22 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
     case WStype_TEXT: {
       Serial.printf("[WSc] get text: %s\n", payload);
       if ((strcmp("meeting", (const char*) payload)) == 0) {
-        Serial.println("equalsCheckWarmSuccessful");
         setLEDsMeetingMode();
       }
       if ((strcmp("meetingOver", (const char*) payload)) == 0) {
-        Serial.println("equalsCheckSeasideSuccessful");
         setLEDsWorkingMode();
+      }
+      if ((strcmp("LDR<300", (const char*) payload)) == 0) {
+        Serial.println("equalsLDR<300successful");
+        adjustBrightness(50);
+      }
+      if ((strcmp("300<LDR<700", (const char*) payload)) == 0) {
+        Serial.println("equals300<LDR<700Successful");
+        adjustBrightness(150);
+      }
+      if ((strcmp("700<LDR", (const char*) payload)) == 0) {
+        Serial.println("equals700<LDRSuccessful");
+        adjustBrightness(250);
       }
       break;
     }
@@ -64,6 +82,8 @@ void setup() {
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 500);
   FastLED.clear();
   pinMode(LED_PIN, OUTPUT);
+
+  setLEDsWorkingMode();
 
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP("TeamNet", "thereisnospoon");

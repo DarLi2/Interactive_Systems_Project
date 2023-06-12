@@ -16,6 +16,7 @@
 
 #include <FastLED.h>
 #define LED_PIN D8
+#define LDR_PIN A0
 #define NUM_LEDS 60
 
 SoftwareSerial mySoftwareSerial(D4,D3); //first argument: number of pin for transmitting; second argument: numver of pin for receiving
@@ -25,6 +26,9 @@ CRGB leds[NUM_LEDS];
 
 const char *ssid = APSSID;
 const char *password = APPSK;
+int LDRValue = 0;
+
+
 
 ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -46,6 +50,7 @@ void meetingOver();
 void webSocketEvent(unsigned char num, WStype_t type, uint8_t* payload, unsigned int lenght) {
   if (type == WStype_CONNECTED) {
     Serial.println("WebSocketClient connected");
+    webSocket.broadcastTXT("newDeviceConnected", 19);
   }
   if (type == WStype_DISCONNECTED) {
     Serial.println("WebSocketClient disconnected");
@@ -53,37 +58,37 @@ void webSocketEvent(unsigned char num, WStype_t type, uint8_t* payload, unsigned
   if (type == WStype_TEXT) {
     if ((strcmp("workingOnTaskEmployee1", (const char*) payload)) == 0) {
       updateStatus('w', 1);
-      webSocket.broadcastTXT("workingOnTaskEmployee1", 23);
+      webSocket.broadcastTXT("statusUpdate_workingOnTaskEmployee1", 36);
     }
     if ((strcmp("workingOnTaskEmployee2", (const char*) payload)) == 0) {
       updateStatus('w', 2);
-      webSocket.broadcastTXT("workingOnTaskEmployee2", 23);
+      webSocket.broadcastTXT("statusUpdate_workingOnTaskEmployee2", 36);
     }
     if ((strcmp("finishedTaskEmployee1", (const char*) payload)) == 0) {
       updateStatus('f', 1);
-      webSocket.broadcastTXT("finishedTaskEmployee1", 22);
+      webSocket.broadcastTXT("statusUpdate_finishedTaskEmployee1", 35);
     }
     if ((strcmp("finishedTaskEmployee2", (const char*) payload)) == 0) {
       updateStatus('f', 2);
-      webSocket.broadcastTXT("finishedTaskEmployee2", 22);
+      webSocket.broadcastTXT("statusUpdate_finishedTaskEmployee2", 35);
     }
     if ((strcmp("questionEmployee1", (const char*) payload)) == 0) {
       updateStatus('q', 1);
-      webSocket.broadcastTXT("questionEmployee1", 18);
+      webSocket.broadcastTXT("statusUpdate_questionEmployee1", 31);
     }
     if ((strcmp("questionEmployee2", (const char*) payload)) == 0) {
       updateStatus('q', 2);
-      webSocket.broadcastTXT("questionEmployee2", 18);
+      webSocket.broadcastTXT("statusUpdate_questionEmployee2", 31);
     }
     if ((strcmp("urgentQuestionEmployee1", (const char*) payload)) == 0) {
       updateStatus('u', 1);
       DFPlayer.play(1);
-      webSocket.broadcastTXT("urgentQuestionEmployee1", 24);
+      webSocket.broadcastTXT("statusUpdate_urgentQuestionEmployee1", 37);
     }
     if ((strcmp("urgentQuestionEmployee2", (const char*) payload)) == 0) {
       updateStatus('u', 2);
       DFPlayer.play(2);
-      webSocket.broadcastTXT("urgentQuestionEmployee2", 24);
+      webSocket.broadcastTXT("statusUpdate_urgentQuestionEmployee2", 37);
     }
     if ((strcmp("meeting", (const char*) payload)) == 0) {
       meeting();
@@ -108,6 +113,7 @@ void setup() {
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 500);
   FastLED.clear();
   pinMode(D8, OUTPUT);
+
 
   mySoftwareSerial.begin(9600);
   if (!DFPlayer.begin(mySoftwareSerial)) {  //Use softwareSerial to communicate with mp3.
@@ -179,9 +185,49 @@ void updateStatus(char status, int employee) {
   setLEDs(start, end, status);
 }
 
+unsigned int previousTime = 0;
+const unsigned long interval = 1000; 
+int brightness = 255;
+char previousLDRValue = 'l';
+
 void loop() {
+
   server.handleClient();
   webSocket.loop();
+
+  unsigned long currentTime = millis();  
+
+  if (currentTime - previousTime >= interval) {
+    LDRValue = analogRead(LDR_PIN);
+    Serial.print("LDRValue:");
+    Serial.println(LDRValue);
+    if (LDRValue < 300) {
+      brightness = 30;
+      if (previousLDRValue != 'l') {
+      webSocket.broadcastTXT("LDR<300", 8);
+      }
+      previousLDRValue = 'l';
+    }
+    else if (LDRValue < 700) {
+      brightness = 150;
+      if (previousLDRValue != 'm') {
+      webSocket.broadcastTXT("300<LDR<700", 12);
+      }
+      previousLDRValue = 'm';
+    }
+    else {
+      brightness = 250;
+      if (previousLDRValue != 'h') {
+      webSocket.broadcastTXT("700<LDR", 8);
+      }
+      previousLDRValue = 'h';
+    }
+    Serial.println(brightness);
+    FastLED.setBrightness(brightness);
+    FastLED.show();
+    FastLED.show();
+    previousTime = currentTime;
+  }
 
 }
 
