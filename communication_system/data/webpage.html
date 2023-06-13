@@ -61,20 +61,20 @@
             <th>Mary</th> 
           </tr>
           <tr>
-              <td><button id='workingOnTaskEmployee1' data-row="1" data-col="1" onclick="websock.send('workingOnTaskEmployee1')"> Working on a task </button></td>
-              <td><button id='workingOnTaskEmployee2' data-row="1" data-col="2" onclick="websock.send('workingOnTaskEmployee2')"> Working on a task </button></td>
+              <td><button id='workingOnTaskEmployee1' data-row="1" data-col="1" onclick="updateEmployeeStatus('workingOnTaskEmployee1')"> Working on a task </button></td>
+              <td><button id='workingOnTaskEmployee2' data-row="1" data-col="2" onclick="updateEmployeeStatus('workingOnTaskEmployee2')"> Working on a task </button></td>
           </tr>
           <tr>
-              <td><button id='finishedTaskEmployee1' data-row="2" data-col="1" onclick="websock.send('finishedTaskEmployee1')"> Finished task </button></td>
-              <td><button id='finishedTaskEmployee2' data-row="2" data-col="2" onclick="websock.send('finishedTaskEmployee2')"> Finished task </button></td>
+              <td><button id='finishedTaskEmployee1' data-row="2" data-col="1" onclick="updateEmployeeStatus('finishedTaskEmployee1')"> Finished task </button></td>
+              <td><button id='finishedTaskEmployee2' data-row="2" data-col="2" onclick="updateEmployeeStatus('finishedTaskEmployee2')"> Finished task </button></td>
           </tr>
           <tr>
-              <td><button id='questionEmployee1' data-row="3" data-col="1" onclick="websock.send('questionEmployee1')"> Question </button></td>
-              <td><button id='questionEmployee2' data-row="3" data-col="2" onclick="websock.send('questionEmployee2')"> Question </button></td>
+              <td><button id='questionEmployee1' data-row="3" data-col="1" onclick="updateEmployeeStatus('questionEmployee1')"> Question </button></td>
+              <td><button id='questionEmployee2' data-row="3" data-col="2" onclick="updateEmployeeStatus('questionEmployee2')"> Question </button></td>
           </tr>
           <tr>
-              <td><button id='urgentQuestionEmployee1' data-row="4" data-col="1" onclick="websock.send('urgentQuestionEmployee1')"> Urgent Question </button></td>
-              <td><button id='urgentQuestionEmployee2' data-row="4" data-col="2" onclick="websock.send('urgentQuestionEmployee2')"> Urgent Question </button></td>
+              <td><button id='urgentQuestionEmployee1' data-row="4" data-col="1" onclick="updateEmployeeStatus('urgentQuestionEmployee1')"> Urgent Question </button></td>
+              <td><button id='urgentQuestionEmployee2' data-row="4" data-col="2" onclick="updateEmployeeStatus('urgentQuestionEmployee2')"> Urgent Question </button></td>
           </tr>
         </table>
   </body>
@@ -101,6 +101,7 @@
     var savedBackgroundColors = {}; 
     var savedColors = {}; 
 
+    //saving Status of Employees to restore it after meeting has ended
     function saveColors() {
       document.querySelectorAll('button:not(#meetingButton)').forEach(function(button) {
         savedBackgroundColors[button.id] = button.style.backgroundColor;
@@ -166,6 +167,12 @@
         meetingButton.style.backgroundColor = 'white';
       }
     }
+
+    function updateEmployeeStatus(status) {
+      if (meetingButton.dataset.state == "off") {
+        websock.send(status);
+      }
+    }
     
     websock.onmessage = function(event) {
 
@@ -189,6 +196,7 @@
         changeColorForMeetings();
       }
 
+      //TODO: statt direkt websocket.send zu rufen eigene funktionen für onclick schreiben und dort prüfen, ob noch in meeting; dann muss hier die zweite Bedingunge nocht mehr überprüft werden und die Farben vom Team Leader werdenn nicht geupdatet
       else if (event.data.indexOf("statusUpdate") != -1 && meetingButton.dataset.state != "on") {
         updateColorOfButtons(event.data.substring(13, event.data.length));
       }
