@@ -13,7 +13,7 @@
                   width: auto;
               }
               body {
-                  background-color: rgba(252, 252, 252, 0.651);
+                  background-color: rgb(211, 214, 213);
                   font-family: Garamond, Verdana, sans-serif;
               }
               img {
@@ -32,6 +32,7 @@
                   height: 150px;
                   text-align: center;
                   font-family: "Trirong", Verdana, sans-serif;
+                  border-radius: 10%;
               }
               table {
                   margin: 0 auto;
@@ -51,30 +52,32 @@
           </style>
   </head>
   <body>
-      <h1>Team Status</h1>
+      <h1>
+        <img src="eule.png" alt="stellvertretend für Firmen-Logo">
+      </h1> 
       
-      <button id="meetingButton" class="meeting-button" data-state="off">Meeting</button>
+      <button id="meetingButton" class="meeting-button" data-state="off"style="background-color: #1e81b0; color: #4B5253">Meeting</button>
       
       <table style='font-family:"Trirong", Verdana, sans-serif'>
           <tr>
-            <th>John</th>
-            <th>Mary</th> 
+            <th style="color: #4B5253 ;">John </th>
+            <th style="color: #4B5253 ;">Mary</th> 
           </tr>
           <tr>
-              <td><button id='workingOnTaskEmployee1' data-row="1" data-col="1" onclick="updateEmployeeStatus('workingOnTaskEmployee1')"> Working on a task </button></td>
-              <td><button id='workingOnTaskEmployee2' data-row="1" data-col="2" onclick="updateEmployeeStatus('workingOnTaskEmployee2')"> Working on a task </button></td>
+              <td><button id='workingOnTaskEmployee1' data-row="1" data-col="1" onclick="updateEmployeeStatus('workingOnTaskEmployee1')"style="background-color: #abdbe3; color: #4B5253"> Working on a task </button></td>
+              <td><button id='workingOnTaskEmployee2' data-row="1" data-col="2" onclick="updateEmployeeStatus('workingOnTaskEmployee2')"style="background-color: #abdbe3; color: #4B5253"> Working on a task </button></td>
           </tr>
           <tr>
-              <td><button id='finishedTaskEmployee1' data-row="2" data-col="1" onclick="updateEmployeeStatus('finishedTaskEmployee1')"> Finished task </button></td>
-              <td><button id='finishedTaskEmployee2' data-row="2" data-col="2" onclick="updateEmployeeStatus('finishedTaskEmployee2')"> Finished task </button></td>
+              <td><button id='finishedTaskEmployee1' data-row="2" data-col="1" onclick="updateEmployeeStatus('finishedTaskEmployee1')"style="background-color: #AFFF7B; color: #4B5253"> Finished task </button></td>
+              <td><button id='finishedTaskEmployee2' data-row="2" data-col="2" onclick="updateEmployeeStatus('finishedTaskEmployee2')"style="background-color: #AFFF7B; color: #4B5253"> Finished task </button></td>
           </tr>
           <tr>
-              <td><button id='questionEmployee1' data-row="3" data-col="1" onclick="updateEmployeeStatus('questionEmployee1')"> Question </button></td>
-              <td><button id='questionEmployee2' data-row="3" data-col="2" onclick="updateEmployeeStatus('questionEmployee2')"> Question </button></td>
+              <td><button id='questionEmployee1' data-row="3" data-col="1" onclick="updateEmployeeStatus('questionEmployee1')"style="background-color: #FDFF70; color: #4B5253"> Question </button></td>
+              <td><button id='questionEmployee2' data-row="3" data-col="2" onclick="updateEmployeeStatus('questionEmployee2')"style="background-color: #FDFF70; color: #4B5253"> Question </button></td>
           </tr>
           <tr>
-              <td><button id='urgentQuestionEmployee1' data-row="4" data-col="1" onclick="updateEmployeeStatus('urgentQuestionEmployee1')"> Urgent Question </button></td>
-              <td><button id='urgentQuestionEmployee2' data-row="4" data-col="2" onclick="updateEmployeeStatus('urgentQuestionEmployee2')"> Urgent Question </button></td>
+              <td><button id='urgentQuestionEmployee1' data-row="4" data-col="1" onclick="updateEmployeeStatus('urgentQuestionEmployee1')"style="background-color: #FF8080; color: #4B5253"> Urgent Question </button></td>
+              <td><button id='urgentQuestionEmployee2' data-row="4" data-col="2" onclick="updateEmployeeStatus('urgentQuestionEmployee2')"style="background-color: #FF8080; color: #4B5253"> Urgent Question </button></td>
           </tr>
         </table>
   </body>
